@@ -1,8 +1,8 @@
 body {
-  background: radial-gradient(#0d1a12, #050805);
-  color: #d6ffe0;
+  background: radial-gradient(#0b1911, #030504);
+  color: #dbffe4;
   font-family: monospace;
-  padding: 20px;
+  padding: 15px;
 }
 
 h1 {
@@ -10,23 +10,29 @@ h1 {
   color: #7dff9a;
 }
 
-#game {
-  max-width: 800px;
+#setup, #game {
+  max-width: 900px;
   margin: auto;
 }
 
-#stats, #inventory {
+.panel {
   border: 1px solid #2f6b47;
   padding: 10px;
   margin-bottom: 10px;
 }
 
+#actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 #actions button {
+  flex: 1;
   background: #1c3526;
-  color: #d6ffe0;
+  color: #dbffe4;
   border: 1px solid #3f8b5c;
   padding: 8px;
-  margin: 4px;
   cursor: pointer;
 }
 
@@ -35,9 +41,9 @@ h1 {
 }
 
 #log {
-  border-top: 1px solid #2f6b47;
   margin-top: 10px;
+  border-top: 1px solid #2f6b47;
   padding-top: 10px;
-  max-height: 250px;
+  max-height: 260px;
   overflow-y: auto;
 }
