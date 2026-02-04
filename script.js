@@ -1,89 +1,104 @@
-let health = 100;
-let hunger = 80;
-let thirst = 80;
-let energy = 80;
+// ------------------ PLAYER ------------------
+let player = {
+  health: 100,
+  hunger: 80,
+  thirst: 80,
+  energy: 80,
+  food: 2,
+  wood: 0,
+  metal: 0,
+  fibers: 0,
+  hasBed: false,
+  hasSpear: false,
+  hasSword: false,
+  hasRevolver: false,
+  day: 1
+};
 
-let wood = 0;
-let metal = 0;
-let plantFibers = 0;
-let food = 2;
-
-let hasBed = false;
-let hasSpear = false;
-let hasSword = false;
-let hasRevolver = false;
-
-let day = 1;
-
-const logDiv = document.getElementById("log");
+// ------------------ UI ------------------
 const statsDiv = document.getElementById("stats");
+const inventoryDiv = document.getElementById("inventory");
+const logDiv = document.getElementById("log");
 
 function log(msg) {
   logDiv.innerHTML = msg + "<br>" + logDiv.innerHTML;
 }
 
-function updateStats() {
+// ------------------ UPDATE UI ------------------
+function updateUI() {
   statsDiv.innerHTML = `
-  <strong>Day ${day}</strong><br>
-  ❤️ Health: ${health}<br>
-  🍗 Hunger: ${hunger}<br>
-  💧 Thirst: ${thirst}<br>
-  ⚡ Energy: ${energy}<br>
-  🍖 Food: ${food}<br>
-  🌲 Wood: ${wood} | 🔩 Metal: ${metal} | 🌿 Fibers: ${plantFibers}
+    <strong>Day ${player.day}</strong><br>
+    ❤️ Health: ${player.health}<br>
+    🍗 Hunger: ${player.hunger}<br>
+    💧 Thirst: ${player.thirst}<br>
+    ⚡ Energy: ${player.energy}
+  `;
+
+  inventoryDiv.innerHTML = `
+    🎒 <strong>Inventory</strong><br>
+    🍖 Food: ${player.food}<br>
+    🌲 Wood: ${player.wood}<br>
+    🔩 Metal: ${player.metal}<br>
+    🌿 Fibers: ${player.fibers}<br>
+    🛏️ Bed: ${player.hasBed ? "Yes" : "No"}<br>
+    🗡️ Spear: ${player.hasSpear ? "Yes" : "No"}<br>
+    ⚔️ Sword: ${player.hasSword ? "Yes" : "No"}<br>
+    🔫 Revolver: ${player.hasRevolver ? "Yes" : "No"}
   `;
 }
 
-function drainStats() {
-  hunger -= 5;
-  thirst -= 7;
-  energy -= 5;
+// ------------------ CORE SYSTEMS ------------------
+function drain() {
+  player.hunger -= 5;
+  player.thirst -= 7;
+  player.energy -= 5;
 
-  if (hunger <= 0 || thirst <= 0) {
-    health -= 10;
+  if (player.hunger <= 0 || player.thirst <= 0) {
+    player.health -= 10;
     log("⚠️ Starvation or dehydration hurts you.");
   }
 
-  if (health <= 0) {
-    log("💀 You were killed by the haunted forest.");
-    disableGame();
+  if (player.health <= 0) {
+    log("💀 You died in the haunted forest.");
+    endGame();
   }
 
-  day++;
-  updateStats();
+  player.day++;
+  updateUI();
 }
 
-function disableGame() {
+function endGame() {
   document.querySelectorAll("button").forEach(b => b.disabled = true);
 }
 
+// ------------------ ACTIONS ------------------
 function scavenge() {
-  let foundWood = Math.floor(Math.random() * 4) + 1;
-  wood += foundWood;
+  const woodFound = rand(1, 4);
+  player.wood += woodFound;
 
   if (Math.random() < 0.15) {
-    metal++;
+    player.metal++;
     log("🔩 You found metal.");
   }
 
-  log(`🌲 You collected ${foundWood} wood.`);
-  drainStats();
+  log(`🌲 Collected ${woodFound} wood.`);
+  drain();
 }
 
 function hunt() {
-  if (energy < 10) {
+  if (player.energy < 10) {
     log("Too tired to hunt.");
     return;
   }
 
-  energy -= 10;
+  player.energy -= 10;
 
   if (Math.random() < 0.65) {
-    let gainedFood = Math.floor(Math.random() * 3) + 1;
-    food += gainedFood;
+    const food = rand(1, 3);
+    player.food += food;
 
-    let roll = Math.random();
-    let fibers =
+    const roll = Math.random();
+    const fibers =
       roll < 0.40 ? 2 :
       roll < 0.60 ? 3 :
       roll < 0.75 ? 4 :
@@ -93,93 +108,126 @@ function hunt() {
       roll < 0.98 ? 8 :
       roll < 0.995 ? 9 : 10;
 
-    plantFibers += fibers;
-
-    log(`🍖 Hunted ${gainedFood} food and 🌿 ${fibers} fibers.`);
+    player.fibers += fibers;
+    log(`🍖 Hunted ${food} food & 🌿 ${fibers} fibers.`);
   } else {
     log("❌ Hunt failed.");
   }
 
-  drainStats();
+  drain();
 }
 
 function eat() {
-  if (food <= 0) {
-    log("No food left.");
+  if (player.food <= 0) {
+    log("No food.");
     return;
   }
-  food--;
-  hunger += 20;
-  log("🍎 You eat food.");
-  updateStats();
+  player.food--;
+  player.hunger += 20;
+  log("🍎 You eat.");
+  updateUI();
 }
 
 function sleep() {
-  if (!hasBed) {
-    energy += 15;
-    log("😴 You sleep on the cold ground.");
+  if (!player.hasBed) {
+    player.energy += 15;
+    log("😴 Sleeping on the ground...");
     if (Math.random() < 0.4) monsterAttack();
   } else {
-    energy += 40;
-    log("🛏️ You sleep safely in your bed.");
+    player.energy += 40;
+    log("🛏️ Safe sleep in bed.");
   }
-  drainStats();
+  drain();
 }
 
-function monsterAttack() {
-  let damage = Math.floor(Math.random() * 16) + 10;
+// ------------------ MONSTERS ------------------
+const monsters = [
+  { name: "Whispering Shade", dmg: [10, 18] },
+  { name: "Bone Stalker", dmg: [15, 25] },
+  { name: "Forest Howler", dmg: [20, 30] }
+];
 
-  if (hasRevolver) {
-    log("🔫 You shoot the monster.");
+function monsterAttack() {
+  const m = monsters[rand(0, monsters.length - 1)];
+  let damage = rand(m.dmg[0], m.dmg[1]);
+
+  log(`👁️ ${m.name} attacks!`);
+
+  if (player.hasRevolver) {
+    log("🔫 You shoot it dead.");
     return;
   }
-  if (hasSword || hasSpear) {
+  if (player.hasSword || player.hasSpear) {
     damage = Math.floor(damage / 2);
     log("⚔️ You fight back.");
   }
 
-  health -= damage;
-  log(`👁️ Monster attacks for ${damage} damage.`);
+  player.health -= damage;
+  log(`💥 Took ${damage} damage.`);
 }
 
-function craft() {
-  let choice = prompt(
+// ------------------ CRAFTING ------------------
+function craftMenu() {
+  const c = prompt(
     "Craft:\n1 Bed (5 wood)\n2 Spear (3 wood, 2 fibers)\n3 Sword (5 metal, 2 wood)\n4 Revolver (6 metal)"
   );
 
-  if (choice === "1" && wood >= 5) {
-    wood -= 5;
-    hasBed = true;
+  if (c === "1" && player.wood >= 5) {
+    player.wood -= 5;
+    player.hasBed = true;
     log("🛏️ Bed crafted.");
-  } else if (choice === "2" && wood >= 3 && plantFibers >= 2) {
-    wood -= 3;
-    plantFibers -= 2;
-    hasSpear = true;
+  } else if (c === "2" && player.wood >= 3 && player.fibers >= 2) {
+    player.wood -= 3;
+    player.fibers -= 2;
+    player.hasSpear = true;
     log("🗡️ Spear crafted.");
-  } else if (choice === "3" && metal >= 5 && wood >= 2) {
-    metal -= 5;
-    wood -= 2;
-    hasSword = true;
-    log("⚔️ Sword crafted.");
-  } else if (choice === "4" && metal >= 6) {
-    metal -= 6;
-    hasRevolver = true;
+  } else if (c === "3" && player.metal >= 5 && player.wood >= 2) {
+    player.metal -= 5;
+    player.wood -= 2;
+    player.hasSword = true;
+    log("⚔️ Sword forged.");
+  } else if (c === "4" && player.metal >= 6) {
+    player.metal -= 6;
+    player.hasRevolver = true;
     log("🔫 Revolver assembled.");
   } else {
     log("❌ Crafting failed.");
   }
 
-  updateStats();
+  updateUI();
 }
 
+// ------------------ WIN CONDITION ------------------
 function repairCar() {
-  if (wood >= 9 && metal >= 7) {
-    log("🚗 You repaired the car and escaped!");
-    log("🎉 YOU WIN!");
-    disableGame();
+  if (player.wood >= 9 && player.metal >= 7) {
+    log("🚗 Car repaired.");
+    log("🎉 YOU ESCAPED!");
+    endGame();
   } else {
-    log("Not enough materials to repair the car.");
+    log("Not enough materials.");
   }
 }
 
-updateStats();
+// ------------------ SAVE / LOAD ------------------
+function saveGame() {
+  localStorage.setItem("hauntedSave", JSON.stringify(player));
+  log("💾 Game saved.");
+}
+
+function loadGame() {
+  const save = localStorage.getItem("hauntedSave");
+  if (!save) {
+    log("No save found.");
+    return;
+  }
+  player = JSON.parse(save);
+  log("📂 Game loaded.");
+  updateUI();
+}
+
+// ------------------ UTILS ------------------
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+updateUI();
