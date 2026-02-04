@@ -9,11 +9,27 @@
 
 <h1>🏕️ Haunted Camping Disaster</h1>
 
-<div id="game">
-  <div id="stats"></div>
-  <div id="inventory"></div>
+<div id="setup">
+  <label>Difficulty:
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="normal" selected>Normal</option>
+      <option value="hard">Hard</option>
+    </select>
+  </label>
+  <label>
+    <input type="checkbox" id="permadeath"> Permadeath
+  </label>
+  <button onclick="startGame()">Start</button>
+</div>
+
+<div id="game" hidden>
+  <div class="panel" id="stats"></div>
+  <div class="panel" id="inventory"></div>
+  <div class="panel" id="map"></div>
 
   <div id="actions">
+    <button onclick="explore()">Explore</button>
     <button onclick="scavenge()">Scavenge</button>
     <button onclick="hunt()">Hunt</button>
     <button onclick="eat()">Eat</button>
