@@ -2,25 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Haunted Camping CYOA</title>
+  <title>Haunted Camping Disaster</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🏕️ Haunted Camping Disaster</h1>
 
+<h1>🏕️ Haunted Camping Disaster</h1>
+
+<div id="game">
   <div id="stats"></div>
+  <div id="inventory"></div>
 
   <div id="actions">
     <button onclick="scavenge()">Scavenge</button>
     <button onclick="hunt()">Hunt</button>
     <button onclick="eat()">Eat</button>
     <button onclick="sleep()">Sleep</button>
-    <button onclick="craft()">Craft</button>
+    <button onclick="craftMenu()">Craft</button>
     <button onclick="repairCar()">Repair Car</button>
+    <button onclick="saveGame()">Save</button>
+    <button onclick="loadGame()">Load</button>
   </div>
 
   <div id="log"></div>
+</div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
